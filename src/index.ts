@@ -23,6 +23,8 @@ import {
   parseArguments,
 } from "./config/index.ts";
 import { initializeDatabase } from "./database/index.ts";
+import { createPrivateMessageHandler } from "./routes/private-message.ts";
+import express from "express";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,7 +46,7 @@ export function createAgent(
   elizaLogger.success(
     elizaLogger.successesTitle,
     "Creating runtime for character",
-    character.name,
+    character.name
   );
 
   nodePlugin ??= createNodePlugin();
@@ -100,7 +102,7 @@ async function startAgent(character: Character, directClient: DirectClient) {
   } catch (error) {
     elizaLogger.error(
       `Error starting agent for character ${character.name}:`,
-      error,
+      error
     );
     console.error(error);
     throw error;
@@ -131,6 +133,8 @@ const startAgents = async () => {
   let serverPort = parseInt(settings.SERVER_PORT || "3000");
   const args = parseArguments();
 
+  let runtime: AgentRuntime | null = null;
+
   let charactersArg = args.characters || args.character;
   let characters = [character];
 
@@ -139,10 +143,9 @@ const startAgents = async () => {
     characters = await loadCharacters(charactersArg);
   }
   console.log("characters", characters);
+
   try {
-    for (const character of characters) {
-      await startAgent(character, directClient as DirectClient);
-    }
+    runtime = await startAgent(character, directClient as DirectClient);
   } catch (error) {
     elizaLogger.error("Error starting agents:", error);
   }
@@ -158,16 +161,33 @@ const startAgents = async () => {
     return startAgent(character, directClient);
   };
 
-  directClient.start(serverPort);
+  await directClient.start(serverPort);
+
+  if (runtime && directClient.app) {
+    const handler = createPrivateMessageHandler(runtime);
+    directClient.app.post(
+      "/:agentId/private-message",
+      async (
+        req: express.Request<{ agentId: string }>,
+        res: express.Response
+      ) => {
+        try {
+          await handler(req, res);
+        } catch (error) {
+          res.status(500).json({ error: "Internal server error" });
+        }
+      }
+    );
+  }
 
   if (serverPort !== parseInt(settings.SERVER_PORT || "3000")) {
     elizaLogger.log(`Server started on alternate port ${serverPort}`);
   }
 
   const isDaemonProcess = process.env.DAEMON_PROCESS === "true";
-  if(!isDaemonProcess) {
+  if (!isDaemonProcess) {
     elizaLogger.log("Chat started. Type 'exit' to quit.");
-    const chat = startChat(characters);
+    const chat = startChat([character]);
     chat();
   }
 };
