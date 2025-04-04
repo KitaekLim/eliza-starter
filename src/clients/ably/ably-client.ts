@@ -4,14 +4,20 @@ import { createAblyService } from "./services.ts";
 import { sendGlobalMessageAction } from "./actions/sendGlobalMessageAction.ts";
 import { sendPrivateMessageAction } from "./actions/sendPrivateMessageAction.ts";
 import { validateAblyConfig } from "./environment.ts";
-
+import {
+  ABLY_AUTO_PROMO_INTERVAL_MS,
+  ABLY_MAX_PORT_OFFSET,
+} from "./constants.ts";
 export interface IMessage {
   text: string;
   userName?: string;
   userId?: string;
 }
 
-let currentServerPort = parseInt(process.env.SERVER_PORT || "3000");
+const apiBaseUrl = process.env.API_BASE_URL;
+const defaultPort = parseInt(process.env.API_DEFAULT_PORT);
+
+let currentServerPort = defaultPort;
 
 export const AblyClientInterface = {
   async start(runtime: IAgentRuntime) {
@@ -39,7 +45,7 @@ export const AblyClientInterface = {
 
       setInterval(() => {
         generateAndSendMessage(encodedKey, runtime, character.name);
-      }, 1800000);
+      }, ABLY_AUTO_PROMO_INTERVAL_MS);
     }, 15000);
 
     return {
@@ -74,13 +80,13 @@ async function generateAndSendMessage(
   try {
     console.log(`Generating promo message for Ably...`);
 
-    for (let portOffset = 0; portOffset < 3; portOffset++) {
+    for (let portOffset = 0; portOffset < ABLY_MAX_PORT_OFFSET; portOffset++) {
       const portToTry = currentServerPort + portOffset;
 
       try {
         console.log(`Trying endpoint at port ${portToTry}...`);
         const response = await fetch(
-          `http://localhost:${portToTry}/${agentId}/message`,
+          `${apiBaseUrl}:${portToTry}/${agentId}/message`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -132,12 +138,12 @@ async function generatePrivateResponse(
   runtime: IAgentRuntime,
   agentId: string
 ) {
-  for (let portOffset = 0; portOffset < 3; portOffset++) {
+  for (let portOffset = 0; portOffset < ABLY_MAX_PORT_OFFSET; portOffset++) {
     const portToTry = currentServerPort + portOffset;
 
     try {
       const response = await fetch(
-        `http://localhost:${portToTry}/${agentId}/message`,
+        `${apiBaseUrl}:${portToTry}/${agentId}/message`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
