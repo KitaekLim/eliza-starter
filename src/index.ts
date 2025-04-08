@@ -130,7 +130,7 @@ const checkPortAvailable = (port: number): Promise<boolean> => {
 
 const startAgents = async () => {
   const directClient = new DirectClient();
-  let serverPort = parseInt(settings.SERVER_PORT || "3000");
+  let serverPort = parseInt(process.env.PORT || settings.SERVER_PORT || "3000");
   const args = parseArguments();
 
   let runtime: AgentRuntime | null = null;
@@ -162,6 +162,25 @@ const startAgents = async () => {
   };
 
   await directClient.start(serverPort);
+
+  if (directClient.app) {
+    directClient.app.use(function (req, res, next) {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+      );
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+      );
+      if (req.method === "OPTIONS") {
+        res.sendStatus(200);
+        return;
+      }
+      next();
+    });
+  }
 
   if (runtime && directClient.app) {
     const handler = createPrivateMessageHandler(runtime);

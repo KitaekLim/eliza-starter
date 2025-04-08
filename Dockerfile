@@ -25,6 +25,8 @@ COPY ./characters ./characters
 
 # Install dependencies and build the project
 RUN pnpm install --frozen-lockfile
+# Install explicitly the missing dependencies
+RUN pnpm add zod express @types/express --save-prod
 RUN pnpm build 
 
 # Create dist directory and set permissions
@@ -59,3 +61,6 @@ COPY --from=builder /app/pnpm-lock.yaml /app/
 EXPOSE 3000
 # Set the command to run the application
 CMD ["pnpm", "start", "--non-interactive"]
+
+ENV PORT=10000
+EXPOSE 10000

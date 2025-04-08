@@ -9,7 +9,8 @@ export const character: Character = {
   ...defaultCharacter,
   name: "Pitboss",
   plugins: [],
-  clients: [Clients.TWITTER, "ably" as Clients],
+  // Clients.TWITTER is removed but it works, add it back if you want to use it
+  clients: ["ably" as Clients],
   modelProvider: ModelProviderName.GROK,
   settings: {
     secrets: {
