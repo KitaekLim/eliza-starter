@@ -10,7 +10,7 @@ export const character: Character = {
   name: "Pitboss",
   plugins: [],
   // Clients.TWITTER is removed but it works, add it back if you want to use it
-  clients: ["ably" as Clients],
+  clients: ["ably" as Clients, "twitter" as Clients],
   modelProvider: ModelProviderName.GROK,
   settings: {
     secrets: {
