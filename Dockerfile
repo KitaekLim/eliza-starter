@@ -61,8 +61,8 @@ COPY --from=builder /app/pnpm-lock.yaml /app/
 # Set the command to run the application
 CMD ["pnpm", "start", "--non-interactive"]
 
-ENV PORT=10000
-EXPOSE 10000
+ENV PORT=3000
+EXPOSE 3000
 
 ENV API_BASE_URL=http://localhost
-ENV API_DEFAULT_PORT=10000
+ENV API_DEFAULT_PORT=3000
