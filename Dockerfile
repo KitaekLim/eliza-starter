@@ -49,6 +49,9 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+ENV PORT=3000
+EXPOSE 3000
+
 # Copy built artifacts and production dependencies from the builder stage
 COPY --from=builder /app/package.json /app/
 COPY --from=builder /app/node_modules /app/node_modules
@@ -60,9 +63,3 @@ COPY --from=builder /app/pnpm-lock.yaml /app/
 
 # Set the command to run the application
 CMD ["pnpm", "start", "--non-interactive"]
-
-ENV PORT=3000
-EXPOSE 3000
-
-ENV API_BASE_URL=http://localhost
-ENV API_DEFAULT_PORT=3000
