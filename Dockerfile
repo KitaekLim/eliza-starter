@@ -58,9 +58,11 @@ COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/tsconfig.json /app/
 COPY --from=builder /app/pnpm-lock.yaml /app/
 
-EXPOSE 3000
 # Set the command to run the application
 CMD ["pnpm", "start", "--non-interactive"]
 
 ENV PORT=10000
 EXPOSE 10000
+
+ENV API_BASE_URL=http://localhost
+ENV API_DEFAULT_PORT=10000
