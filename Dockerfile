@@ -25,6 +25,8 @@ COPY ./characters ./characters
 
 # Install dependencies and build the project
 RUN pnpm install --frozen-lockfile
+# Install explicitly the missing dependencies
+RUN pnpm add zod express @types/express --save-prod
 RUN pnpm build 
 
 # Create dist directory and set permissions
@@ -47,6 +49,9 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+ENV PORT=3000
+EXPOSE 3000
+
 # Copy built artifacts and production dependencies from the builder stage
 COPY --from=builder /app/package.json /app/
 COPY --from=builder /app/node_modules /app/node_modules
@@ -56,6 +61,5 @@ COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/tsconfig.json /app/
 COPY --from=builder /app/pnpm-lock.yaml /app/
 
-EXPOSE 3000
 # Set the command to run the application
 CMD ["pnpm", "start", "--non-interactive"]

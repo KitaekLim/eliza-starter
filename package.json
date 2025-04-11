@@ -25,6 +25,8 @@
     "@elizaos/plugin-solana": "0.1.7",
     "@elizaos/plugin-starknet": "0.1.7",
     "@tavily/core": "0.0.2",
+    "@types/ably": "^1.0.0",
+    "ably": "^2.6.5",
     "amqplib": "0.10.5",
     "better-sqlite3": "11.5.0",
     "fs": "0.0.1-security",
