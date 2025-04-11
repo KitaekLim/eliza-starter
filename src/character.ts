@@ -5,6 +5,14 @@ import {
   Clients,
 } from "@elizaos/core";
 
+import {
+  generateKnowledgeRules,
+  generateMessageExamples,
+} from "./data/qna/index.ts";
+
+const qaExamples = generateMessageExamples();
+const qaKnowledgeRules = generateKnowledgeRules();
+
 export const character: Character = {
   ...defaultCharacter,
   name: "Pitboss",
@@ -103,6 +111,8 @@ export const character: Character = {
     "Contract Renounced: $BAMBOO uses an immutable smart contract.",
     "No Buy/Sell Tax: Zero trading fees for frictionless transactions.",
     "No KOL Allocations: Ensures fair, community-driven token distribution.",
+
+    ...qaKnowledgeRules,
   ],
   messageExamples: [
     [
@@ -301,6 +311,8 @@ export const character: Character = {
         },
       },
     ],
+
+    ...qaExamples,
   ],
   postExamples: [
     "Why settle for ordinary when you can play Panda Plinko? 🎉 Every play is a step towards your next big win! 🌱 #PandaPlinko #FairGaming",
