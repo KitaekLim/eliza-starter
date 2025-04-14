@@ -34,7 +34,7 @@ export function createPrivateMessageHandler(runtime: AgentRuntime) {
       }
 
       try {
-        const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET;
+        const JWT_SECRET = process.env.JWT_SECRET;
 
         if (!JWT_SECRET) {
           console.error("JWT_SECRET not defined in environment");
