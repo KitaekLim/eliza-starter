@@ -6,6 +6,7 @@ interface PrivateMessageRequest {
   text: string;
   channelId: string;
   token?: string;
+  username?: string;
 }
 
 interface JwtVerificationError extends Error {
@@ -17,7 +18,7 @@ export function createPrivateMessageHandler(runtime: AgentRuntime) {
     req: Request<{ agentId: string }, any, PrivateMessageRequest>,
     res: Response
   ) {
-    const { text, channelId } = req.body;
+    const { text, channelId, username } = req.body;
 
     if (!text || !channelId) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -63,7 +64,16 @@ export function createPrivateMessageHandler(runtime: AgentRuntime) {
         throw new Error("Ably client not initialized");
       }
 
-      await ablyClient.handlePrivateMessage(text, channelId);
+      const contextWithUsername = {
+        channelId,
+        username: username || "User",
+      };
+
+      await ablyClient.handlePrivateMessage(
+        text,
+        channelId,
+        contextWithUsername
+      );
       res.json({ success: true });
     } catch (error) {
       console.error("Error processing private message:", error);

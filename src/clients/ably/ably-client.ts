@@ -51,12 +51,18 @@ export const AblyClientInterface = {
     return {
       sendMessage: (message: IMessage) =>
         ablyService.sendGlobalMessage(message),
-      handlePrivateMessage: async (text: string, channelId: string) => {
+      handlePrivateMessage: async (
+        text: string,
+        channelId: string,
+        context?: any
+      ) => {
         try {
+          const username = context?.username || "User";
           const response = await generatePrivateResponse(
             text,
             runtime,
-            runtime.character.name
+            runtime.character.name,
+            username
           );
           await ablyService.sendPrivateMessage(response, channelId);
           return true;
@@ -136,21 +142,24 @@ async function generateAndSendMessage(
 async function generatePrivateResponse(
   text: string,
   runtime: IAgentRuntime,
-  agentId: string
+  agentId: string,
+  username: string = "User"
 ) {
   for (let portOffset = 0; portOffset < ABLY_MAX_PORT_OFFSET; portOffset++) {
     const portToTry = currentServerPort + portOffset;
 
     try {
+      const contextualText = `[You are talking to a user named: ${username}]\n${text}`;
+
       const response = await fetch(
         `${apiBaseUrl}:${portToTry}/${agentId}/message`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            text: text,
+            text: contextualText,
             userId: "private-chat",
-            userName: "User",
+            userName: username,
           }),
         }
       );
