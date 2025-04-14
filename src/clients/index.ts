@@ -3,17 +3,18 @@ import { DiscordClientInterface } from "@elizaos/client-discord";
 import { TelegramClientInterface } from "@elizaos/client-telegram";
 import { TwitterClientInterface } from "@elizaos/client-twitter";
 import { Character, IAgentRuntime } from "@elizaos/core";
+import { AblyClientInterface } from "./ably/ably-client.ts";
 
 export async function initializeClients(
   character: Character,
   runtime: IAgentRuntime
 ) {
   const clients = [];
-  const clientTypes = character.clients?.map((str) => str.toLowerCase()) || [];
+  const clientTypes =
+    character.clients?.map((str) => str.toString().toLowerCase()) || [];
 
   if (clientTypes.includes("auto")) {
-    const autoClient = await AutoClientInterface.start(runtime);
-    if (autoClient) clients.push(autoClient);
+    clients.push(await AutoClientInterface.start(runtime));
   }
 
   if (clientTypes.includes("discord")) {
@@ -28,6 +29,11 @@ export async function initializeClients(
   if (clientTypes.includes("twitter")) {
     const twitterClients = await TwitterClientInterface.start(runtime);
     clients.push(twitterClients);
+  }
+
+  if (clientTypes.includes("ably")) {
+    const ablyClient = await AblyClientInterface.start(runtime);
+    if (ablyClient) clients.push(ablyClient);
   }
 
   if (character.plugins?.length > 0) {
